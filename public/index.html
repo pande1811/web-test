@@ -1,0 +1,570 @@
+<!doctype html>
+<html lang="id">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>To-Do List</title>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=DM+Sans:wght@400;500&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      *,
+      *::before,
+      *::after {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+
+      :root {
+        --bg: #0f0f14;
+        --card: #1a1a24;
+        --border: #2a2a38;
+        --accent1: #ff6b6b;
+        --accent2: #ffd93d;
+        --accent3: #6bcb77;
+        --accent4: #4d96ff;
+        --text: #f0f0f5;
+        --muted: #888899;
+      }
+
+      body {
+        background: var(--bg);
+        color: var(--text);
+        font-family: "DM Sans", sans-serif;
+        min-height: 100vh;
+        padding: 40px 20px;
+        background-image:
+          radial-gradient(
+            ellipse at 10% 20%,
+            rgba(255, 107, 107, 0.08) 0%,
+            transparent 50%
+          ),
+          radial-gradient(
+            ellipse at 90% 80%,
+            rgba(77, 150, 255, 0.08) 0%,
+            transparent 50%
+          );
+      }
+
+      .container {
+        max-width: 620px;
+        margin: 0 auto;
+      }
+
+      /* Header */
+      .header {
+        margin-bottom: 36px;
+        animation: fadeDown 0.6s ease both;
+      }
+      .header h1 {
+        font-family: "Syne", sans-serif;
+        font-size: 2.8rem;
+        font-weight: 800;
+        line-height: 1;
+        background: linear-gradient(135deg, var(--accent1), var(--accent2));
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+      }
+      .header p {
+        color: var(--muted);
+        margin-top: 8px;
+        font-size: 0.95rem;
+      }
+
+      /* Stats */
+      .stats {
+        display: flex;
+        gap: 12px;
+        margin-bottom: 28px;
+        animation: fadeDown 0.6s 0.1s ease both;
+      }
+      .stat {
+        flex: 1;
+        background: var(--card);
+        border: 1px solid var(--border);
+        border-radius: 14px;
+        padding: 14px 16px;
+        text-align: center;
+      }
+      .stat-num {
+        font-family: "Syne", sans-serif;
+        font-size: 1.8rem;
+        font-weight: 700;
+      }
+      .stat-num.total {
+        color: var(--accent4);
+      }
+      .stat-num.done {
+        color: var(--accent3);
+      }
+      .stat-num.todo {
+        color: var(--accent1);
+      }
+      .stat-label {
+        font-size: 0.75rem;
+        color: var(--muted);
+        margin-top: 2px;
+      }
+
+      /* Input */
+      .input-area {
+        display: flex;
+        gap: 10px;
+        margin-bottom: 24px;
+        animation: fadeDown 0.6s 0.2s ease both;
+      }
+      .input-area input {
+        flex: 1;
+        background: var(--card);
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        padding: 14px 18px;
+        color: var(--text);
+        font-family: "DM Sans", sans-serif;
+        font-size: 0.95rem;
+        outline: none;
+        transition: border-color 0.2s;
+      }
+      .input-area input:focus {
+        border-color: var(--accent4);
+      }
+      .input-area input::placeholder {
+        color: var(--muted);
+      }
+      .btn-add {
+        background: linear-gradient(135deg, var(--accent4), #845ef7);
+        border: none;
+        border-radius: 12px;
+        padding: 14px 22px;
+        color: white;
+        font-family: "Syne", sans-serif;
+        font-weight: 700;
+        font-size: 1.1rem;
+        cursor: pointer;
+        transition:
+          transform 0.15s,
+          opacity 0.15s;
+      }
+      .btn-add:hover {
+        transform: scale(1.05);
+        opacity: 0.9;
+      }
+      .btn-add:active {
+        transform: scale(0.97);
+      }
+
+      /* Filter */
+      .filters {
+        display: flex;
+        gap: 8px;
+        margin-bottom: 20px;
+        animation: fadeDown 0.6s 0.3s ease both;
+      }
+      .filter-btn {
+        background: var(--card);
+        border: 1px solid var(--border);
+        border-radius: 20px;
+        padding: 6px 16px;
+        color: var(--muted);
+        font-family: "DM Sans", sans-serif;
+        font-size: 0.85rem;
+        cursor: pointer;
+        transition: all 0.2s;
+      }
+      .filter-btn.active {
+        background: var(--accent4);
+        border-color: var(--accent4);
+        color: white;
+      }
+
+      /* Todo List */
+      .todo-list {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+      }
+
+      .todo-item {
+        background: var(--card);
+        border: 1px solid var(--border);
+        border-radius: 14px;
+        padding: 16px 18px;
+        display: flex;
+        align-items: center;
+        gap: 14px;
+        animation: fadeIn 0.3s ease both;
+        transition:
+          border-color 0.2s,
+          transform 0.15s;
+      }
+      .todo-item:hover {
+        border-color: #3a3a50;
+        transform: translateX(3px);
+      }
+      .todo-item.selesai {
+        opacity: 0.55;
+      }
+
+      .check-btn {
+        width: 26px;
+        height: 26px;
+        border-radius: 50%;
+        border: 2px solid var(--border);
+        background: transparent;
+        cursor: pointer;
+        flex-shrink: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.8rem;
+        transition: all 0.2s;
+        color: white;
+      }
+      .check-btn:hover {
+        border-color: var(--accent3);
+      }
+      .todo-item.selesai .check-btn {
+        background: var(--accent3);
+        border-color: var(--accent3);
+      }
+
+      .todo-text {
+        flex: 1;
+        font-size: 0.95rem;
+        line-height: 1.4;
+      }
+      .todo-item.selesai .todo-text {
+        text-decoration: line-through;
+      }
+
+      /* Tag warna acak */
+      .todo-tag {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        flex-shrink: 0;
+      }
+
+      .delete-btn {
+        background: transparent;
+        border: none;
+        color: var(--muted);
+        cursor: pointer;
+        font-size: 1.1rem;
+        padding: 4px;
+        border-radius: 8px;
+        transition:
+          color 0.2s,
+          background 0.2s;
+        line-height: 1;
+      }
+      .delete-btn:hover {
+        color: var(--accent1);
+        background: rgba(255, 107, 107, 0.1);
+      }
+
+      /* Empty state */
+      .empty {
+        text-align: center;
+        padding: 50px 20px;
+        color: var(--muted);
+        animation: fadeIn 0.3s ease;
+      }
+      .empty .icon {
+        font-size: 3rem;
+        margin-bottom: 12px;
+      }
+      .empty p {
+        font-size: 0.95rem;
+      }
+
+      /* API Info */
+      .api-info {
+        margin-top: 40px;
+        background: var(--card);
+        border: 1px solid var(--border);
+        border-radius: 14px;
+        padding: 20px;
+        animation: fadeDown 0.6s 0.4s ease both;
+      }
+      .api-info h3 {
+        font-family: "Syne", sans-serif;
+        font-size: 1rem;
+        margin-bottom: 14px;
+        color: var(--accent2);
+      }
+      .api-route {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 8px 0;
+        border-bottom: 1px solid var(--border);
+        font-size: 0.82rem;
+      }
+      .api-route:last-child {
+        border-bottom: none;
+      }
+      .method {
+        font-family: "Syne", sans-serif;
+        font-size: 0.75rem;
+        font-weight: 700;
+        padding: 3px 8px;
+        border-radius: 6px;
+        min-width: 60px;
+        text-align: center;
+      }
+      .GET {
+        background: rgba(107, 203, 119, 0.15);
+        color: var(--accent3);
+      }
+      .POST {
+        background: rgba(77, 150, 255, 0.15);
+        color: var(--accent4);
+      }
+      .PUT {
+        background: rgba(255, 217, 61, 0.15);
+        color: var(--accent2);
+      }
+      .DELETE {
+        background: rgba(255, 107, 107, 0.15);
+        color: var(--accent1);
+      }
+      .route-path {
+        color: var(--muted);
+        font-family: monospace;
+      }
+      .route-desc {
+        color: var(--text);
+        margin-left: auto;
+      }
+
+      /* Animations */
+      @keyframes fadeDown {
+        from {
+          opacity: 0;
+          transform: translateY(-16px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+      @keyframes fadeIn {
+        from {
+          opacity: 0;
+          transform: translateY(8px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      .toast {
+        position: fixed;
+        bottom: 24px;
+        right: 24px;
+        background: var(--accent3);
+        color: #0f0f14;
+        font-family: "Syne", sans-serif;
+        font-weight: 700;
+        padding: 12px 20px;
+        border-radius: 12px;
+        font-size: 0.9rem;
+        opacity: 0;
+        transform: translateY(10px);
+        transition: all 0.3s;
+        pointer-events: none;
+      }
+      .toast.show {
+        opacity: 1;
+        transform: translateY(0);
+      }
+      .toast.error {
+        background: var(--accent1);
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <div class="header">
+        <h1>To-Do List</h1>
+        <p>Belajar REST API dengan Node.js + Express</p>
+      </div>
+
+      <div class="stats">
+        <div class="stat">
+          <div class="stat-num total" id="stat-total">0</div>
+          <div class="stat-label">Total</div>
+        </div>
+        <div class="stat">
+          <div class="stat-num done" id="stat-done">0</div>
+          <div class="stat-label">Selesai</div>
+        </div>
+        <div class="stat">
+          <div class="stat-num todo" id="stat-todo">0</div>
+          <div class="stat-label">Belum</div>
+        </div>
+      </div>
+
+      <div class="input-area">
+        <input type="text" id="input-todo" placeholder="Tambah tugas baru..." />
+        <button class="btn-add" onclick="tambahTodo()">+</button>
+      </div>
+
+      <div class="filters">
+        <button class="filter-btn active" onclick="setFilter('semua', this)">
+          Semua
+        </button>
+        <button class="filter-btn" onclick="setFilter('belum', this)">
+          Belum Selesai
+        </button>
+        <button class="filter-btn" onclick="setFilter('selesai', this)">
+          Selesai
+        </button>
+      </div>
+
+      <div class="todo-list" id="todo-list"></div>
+
+      <div class="api-info">
+        <h3>📡 REST API Endpoints</h3>
+        <div class="api-route">
+          <span class="method GET">GET</span>
+          <span class="route-path">/api/todos</span>
+          <span class="route-desc">Ambil semua todo</span>
+        </div>
+        <div class="api-route">
+          <span class="method POST">POST</span>
+          <span class="route-path">/api/todos</span>
+          <span class="route-desc">Tambah todo baru</span>
+        </div>
+        <div class="api-route">
+          <span class="method PUT">PUT</span>
+          <span class="route-path">/api/todos/:id</span>
+          <span class="route-desc">Tandai selesai/belum</span>
+        </div>
+        <div class="api-route">
+          <span class="method DELETE">DELETE</span>
+          <span class="route-path">/api/todos/:id</span>
+          <span class="route-desc">Hapus todo</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="toast" id="toast"></div>
+
+    <script>
+      const COLORS = [
+        "#ff6b6b",
+        "#ffd93d",
+        "#6bcb77",
+        "#4d96ff",
+        "#cc5de8",
+        "#ff922b",
+      ];
+      let allTodos = [];
+      let filter = "semua";
+
+      function getColor(id) {
+        return COLORS[id % COLORS.length];
+      }
+
+      async function fetchTodos() {
+        const res = await fetch("/api/todos");
+        allTodos = await res.json();
+        renderTodos();
+        updateStats();
+      }
+
+      function renderTodos() {
+        const list = document.getElementById("todo-list");
+        let data = allTodos;
+        if (filter === "selesai") data = allTodos.filter((t) => t.selesai);
+        if (filter === "belum") data = allTodos.filter((t) => !t.selesai);
+
+        if (data.length === 0) {
+          list.innerHTML = `<div class="empty"><div class="icon">✨</div><p>Tidak ada tugas di sini</p></div>`;
+          return;
+        }
+
+        list.innerHTML = data
+          .map(
+            (todo) => `
+      <div class="todo-item ${todo.selesai ? "selesai" : ""}" id="item-${todo.id}">
+        <span class="todo-tag" style="background:${getColor(todo.id)}"></span>
+        <button class="check-btn" onclick="toggleTodo(${todo.id})">${todo.selesai ? "✓" : ""}</button>
+        <span class="todo-text">${todo.text}</span>
+        <button class="delete-btn" onclick="hapusTodo(${todo.id})">✕</button>
+      </div>
+    `,
+          )
+          .join("");
+      }
+
+      function updateStats() {
+        const selesai = allTodos.filter((t) => t.selesai).length;
+        document.getElementById("stat-total").textContent = allTodos.length;
+        document.getElementById("stat-done").textContent = selesai;
+        document.getElementById("stat-todo").textContent =
+          allTodos.length - selesai;
+      }
+
+      async function tambahTodo() {
+        const input = document.getElementById("input-todo");
+        const text = input.value.trim();
+        if (!text) {
+          showToast("Tugas tidak boleh kosong!", true);
+          return;
+        }
+
+        const res = await fetch("/api/todos", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ text }),
+        });
+        if (res.ok) {
+          input.value = "";
+          await fetchTodos();
+          showToast("Tugas ditambahkan! ✓");
+        }
+      }
+
+      async function toggleTodo(id) {
+        await fetch(`/api/todos/${id}`, { method: "PUT" });
+        await fetchTodos();
+      }
+
+      async function hapusTodo(id) {
+        await fetch(`/api/todos/${id}`, { method: "DELETE" });
+        await fetchTodos();
+        showToast("Tugas dihapus!", true);
+      }
+
+      function setFilter(f, btn) {
+        filter = f;
+        document
+          .querySelectorAll(".filter-btn")
+          .forEach((b) => b.classList.remove("active"));
+        btn.classList.add("active");
+        renderTodos();
+      }
+
+      function showToast(msg, isError = false) {
+        const t = document.getElementById("toast");
+        t.textContent = msg;
+        t.className = "toast show" + (isError ? " error" : "");
+        setTimeout(() => (t.className = "toast"), 2500);
+      }
+
+      // Enter untuk tambah
+      document.getElementById("input-todo").addEventListener("keydown", (e) => {
+        if (e.key === "Enter") tambahTodo();
+      });
+
+      fetchTodos();
+    </script>
+  </body>
+</html>
